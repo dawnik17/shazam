@@ -9,7 +9,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional, Dict
 
-from transformers import WhisperProcessor
+from transformers import AutoProcessor
 from transformers import AutoConfig, AutoTokenizer
 from transformers import (
     HfArgumentParser,
@@ -136,7 +136,7 @@ def main():
     # Set seed
     set_seed(training_args.seed)
 
-    tokenizer = WhisperProcessor.from_pretrained(
+    tokenizer = AutoProcessor.from_pretrained(
         (
             model_args.tokenizer_name
             if model_args.tokenizer_name

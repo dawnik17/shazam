@@ -5,7 +5,7 @@ from typing import Dict, Optional
 import torch
 import torch.distributed as dist
 from torch import nn, Tensor
-from transformers import AutoModel, WhisperForConditionalGeneration
+from transformers import AutoModel, AutoModelForSpeechSeq2Seq
 from transformers.file_utils import ModelOutput
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class BiEncoderModel(nn.Module):
         use_inbatch_neg: bool = True,
     ):
         super().__init__()
-        model = WhisperForConditionalGeneration.from_pretrained(model_name)
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(model_name)
         self.model = model.model.encoder
         self.cross_entropy = nn.CrossEntropyLoss(reduction="mean")
 
