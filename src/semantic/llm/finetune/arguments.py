@@ -42,7 +42,7 @@ class DataArguments:
     train_data_dir_list: str = field(
         default=None, metadata={"help": "Path to train data"}
     )
-    train_group_size: int = field(default=8)
+    train_group_size: int = field(default=1)
     sampling_rate: int = field(default=16_000)
 
     query_max_len: int = field(
@@ -89,7 +89,7 @@ class DataArguments:
 @dataclass
 class RetrieverTrainingArguments(TrainingArguments):
     negatives_cross_device: bool = field(
-        default=False, metadata={"help": "share negatives across devices"}
+        default=True, metadata={"help": "share negatives across devices"}
     )
     temperature: Optional[float] = field(default=0.02)
     fix_position_embedding: bool = field(

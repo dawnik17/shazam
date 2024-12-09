@@ -9,6 +9,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional, Dict
 
+from transformers import WhisperProcessor
 from transformers import AutoConfig, AutoTokenizer
 from transformers import (
     HfArgumentParser,
@@ -25,7 +26,7 @@ from arguments import (
     DataArguments,
     RetrieverTrainingArguments as TrainingArguments,
 )
-from data import TrainDatasetForEmbedding, EmbedCollator
+from data import TrainDatasetForAudioEmbedding, EmbedCollator
 from modeling import BiEncoderModel
 from trainer import BiTrainer
 
@@ -135,26 +136,27 @@ def main():
     # Set seed
     set_seed(training_args.seed)
 
-    num_labels = 1
-    tokenizer = AutoTokenizer.from_pretrained(
+    tokenizer = WhisperProcessor.from_pretrained(
         (
             model_args.tokenizer_name
             if model_args.tokenizer_name
             else model_args.model_name_or_path
         ),
-        cache_dir=model_args.cache_dir,
-        use_fast=False,
+        # cache_dir=model_args.cache_dir,
+        # use_fast=False,
     )
-    config = AutoConfig.from_pretrained(
-        (
-            model_args.config_name
-            if model_args.config_name
-            else model_args.model_name_or_path
-        ),
-        num_labels=num_labels,
-        cache_dir=model_args.cache_dir,
-    )
-    logger.info("Config: %s", config)
+
+    # num_labels = 1
+    # config = AutoConfig.from_pretrained(
+    #     (
+    #         model_args.config_name
+    #         if model_args.config_name
+    #         else model_args.model_name_or_path
+    #     ),
+    #     num_labels=num_labels,
+    #     cache_dir=model_args.cache_dir,
+    # )
+    # logger.info("Config: %s", config)
 
     model = BiEncoderModel(
         model_name=model_args.model_name_or_path,
@@ -171,7 +173,7 @@ def main():
                 logging.info(f"Freeze the parameters for {k}")
                 v.requires_grad = False
 
-    train_dataset = TrainDatasetForEmbedding(args=data_args, tokenizer=tokenizer)
+    train_dataset = TrainDatasetForAudioEmbedding(args=data_args, tokenizer=tokenizer)
 
     trainer = BiTrainer(
         model=model,
