@@ -145,15 +145,15 @@ class EmbedCollator(DataCollatorWithPadding):
             query, 
             sampling_rate=self.tokenizer.sampling_rate,
             max_length=self.query_max_len,
-            return_tensors="pt", 
-            truncation=True,
-            padding=True).input_features
+            # padding=True,
+            # truncation=True,
+            return_tensors="pt").input_features
 
         p_collated = self.tokenizer(
             passage,
             sampling_rate=self.tokenizer.sampling_rate,
-            max_length=self.passage_max_len,
-            return_tensors="pt", 
-            truncation=True,
-            padding=True).input_features
+            max_length=self.passage_max_len, 
+            # padding=True,
+            # truncation=True,
+            return_tensors="pt").input_features
         return {"query": q_collated, "passage": p_collated}

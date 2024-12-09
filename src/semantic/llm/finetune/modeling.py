@@ -68,21 +68,24 @@ class BiEncoderModel(nn.Module):
     def gradient_checkpointing_enable(self, **kwargs):
         self.model.gradient_checkpointing_enable(**kwargs)
 
-    def sentence_embedding(self, hidden_state, mask):
-        if self.sentence_pooling_method == "mean":
-            s = torch.sum(hidden_state * mask.unsqueeze(-1).float(), dim=1)
-            d = mask.sum(axis=1, keepdim=True).float()
-            return s / d
-        elif self.sentence_pooling_method == "cls":
-            return hidden_state[:, 0]
+    # def sentence_embedding(self, hidden_state, mask):
+    #     if self.sentence_pooling_method == "mean":
+    #         s = torch.sum(hidden_state * mask.unsqueeze(-1).float(), dim=1)
+    #         d = mask.sum(axis=1, keepdim=True).float()
+    #         return s / d
+    #     elif self.sentence_pooling_method == "cls":
+    #         return hidden_state[:, 0]
+        
+    def whisper_sentence_embedding(self, hidden_state, **kwargs):
+        return hidden_state.mean(dim=1)
 
     def encode(self, features):
         if features is None:
             return None
+        
         psg_out = self.model(**features, return_dict=True)
-        p_reps = self.sentence_embedding(
-            psg_out.last_hidden_state, features["attention_mask"]
-        )
+        p_reps = self.whisper_sentence_embedding(psg_out.last_hidden_state)
+
         if self.normlized:
             p_reps = torch.nn.functional.normalize(p_reps, dim=-1)
         return p_reps.contiguous()
@@ -95,8 +98,7 @@ class BiEncoderModel(nn.Module):
     def forward(
         self,
         query: Dict[str, Tensor] = None,
-        passage: Dict[str, Tensor] = None,
-        teacher_score: Tensor = None,
+        passage: Dict[str, Tensor] = None
     ):
         q_reps = self.encode(query)
         p_reps = self.encode(passage)
